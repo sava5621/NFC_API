@@ -6,7 +6,7 @@
 
         public Dictionary<string, string> GetAccessDict()
         {
-            if (AccessToken == null)
+            if (AccessToken != null)
             {
                 Dictionary<string, string> dict = GetDict();
                 dict.Add("AccessToken", AccessToken);

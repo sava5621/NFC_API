@@ -2,32 +2,32 @@
 using NFC_API.Model;
 using System.Security.Cryptography;
 using System.Text;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace NFC_API.Services
 {
     public class TokenServices
     {
-        public static bool CheckTokenAsync(UserRefreshToken refreshToken, string salt)
+        public static bool CheckToken(UserRefreshToken refreshToken, string salt)
         {
-            string token = Encript(JsonConvert.SerializeObject(refreshToken.GetRefreshDict(), Formatting.Indented) + salt);
+            string token = Encript(JsonConvert.SerializeObject(refreshToken.GetAccessDict(), Formatting.Indented) + salt);
             if (token == refreshToken.RefreshToken) return true;
             else return false;
         }
-        public static bool CheckTokenAsync(UserAccessToken accessToken, string salt)
+        public static bool CheckToken(UserAccessToken accessToken, string salt)
         {
-            string token = Encript(JsonConvert.SerializeObject(accessToken.GetAccessDict(), Formatting.Indented) + salt);
+            string noEncriptToken = JsonConvert.SerializeObject(accessToken.GetDict(), Formatting.Indented) + salt;
+            string token = Encript(noEncriptToken);
             if(token == accessToken.AccessToken) return true;
             else return false;
         }
+        public static bool CheckDateTimeToken(UserTokenBase accessToken)
+        {
+            if (accessToken.ExpirationTime >= DateTime.Now) return true;
+            else return false;
+        }
         //может не нужно
-        static async Task<UserAccessToken> GetAccessTokenAsync()
-        {
-            return null;
-        }
-        static async Task<UserRefreshToken> GetRefreshTokenAsync()
-        {
-            return null;
-        }
+
         public static UserRefreshToken GetRefreshTokenAsync(UserModelDB user, int minLife)
         {
             UserRefreshToken userRefreshToken = new()
@@ -36,8 +36,9 @@ namespace NFC_API.Services
                 CreationTime = DateTime.Now,
                 ExpirationTime = DateTime.Now.AddMinutes(minLife)
             };
+            string noEncriptToken = JsonConvert.SerializeObject(userRefreshToken.GetDict(), Formatting.Indented) + user.salt;
             userRefreshToken.AccessToken =
-                Encript(JsonConvert.SerializeObject(userRefreshToken.GetDict(), Formatting.Indented)+user.salt);
+                Encript(noEncriptToken);
             userRefreshToken.RefreshToken =
                 Encript(JsonConvert.SerializeObject(userRefreshToken.GetAccessDict(), Formatting.Indented) + user.salt);
 

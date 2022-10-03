@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using NFC_API.OldModel;
+using NFC_API.Services;
 
 namespace NFC_API.Controllers
 {
@@ -10,9 +11,11 @@ namespace NFC_API.Controllers
     public class DataController : ControllerBase
     {
         private readonly dbContext db;
+
         public DataController(dbContext dbContext)
         {
             db = dbContext;
+            
         }
         [HttpGet("Hi")]
         public async Task<string> Hi()
